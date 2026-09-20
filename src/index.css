@@ -1,16 +1,57 @@
 @import "tailwindcss";
 
 @media print {
+  /* Hide application navigation, interactive controls and background chrome when printing */
   header,
-  #patient-sticky-context-bar button,
+  nav,
+  footer,
+  #patient-sticky-context-bar,
   #btn-pwa-install,
   #banner-offline-mode,
-  footer {
+  .print\:hidden {
     display: none !important;
   }
 
-  body {
-    background: white !important;
-    color: black !important;
+  /* Reset body and page styling for clean document printing */
+  html, body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    font-size: 12pt;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Override fixed overlay positioning for modal to print seamlessly */
+  .fixed {
+    position: static !important;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    inset: auto !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  .relative.w-full.max-w-4xl {
+    max-width: 100% !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+  }
+
+  /* Expand document body to full height with zero overflow clipping */
+  #patient-clinical-report-document {
+    max-height: none !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Prevent awkward page breaks inside clinical sections */
+  section, .break-inside-avoid {
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 }
+

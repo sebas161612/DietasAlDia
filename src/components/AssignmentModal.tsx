@@ -218,6 +218,7 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
                     className="w-full text-xs sm:text-sm p-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-teal-600 focus:outline-hidden bg-slate-50/50"
                   >
                     <option value="Vía Oral">Vía Oral</option>
+                    <option value="Vía Mixta (Oral asistida)">Vía Mixta (Oral asistida)</option>
                     <option value="Vía Enteral por Sonda">Vía Enteral por Sonda</option>
                     <option value="Vía Mixta (Oral + Enteral)">Vía Mixta (Oral + Enteral)</option>
                     <option value="Vía Parenteral Complementaria">Vía Parenteral Complementaria</option>

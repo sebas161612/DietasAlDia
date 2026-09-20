@@ -13,6 +13,7 @@ import { RecommendedDietsView } from './components/RecommendedDietsView';
 import { TechnicalSheetModal } from './components/TechnicalSheetModal';
 import { AssignmentModal } from './components/AssignmentModal';
 import { PatientProfileModal } from './components/PatientProfileModal';
+import { PatientClinicalReportModal } from './components/PatientClinicalReportModal';
 import { TreatmentsView } from './components/TreatmentsView';
 import { OfflineIndicator } from './components/OfflineIndicator';
 import { Activity, ShieldCheck } from 'lucide-react';
@@ -28,6 +29,7 @@ export default function App() {
 
   // Modals state
   const [profileModalPatient, setProfileModalPatient] = useState<Patient | null>(null);
+  const [reportModalPatient, setReportModalPatient] = useState<Patient | null>(null);
   const [technicalSheetAnalysis, setTechnicalSheetAnalysis] =
     useState<CompatibilityAnalysis | null>(null);
   const [assignmentAnalysis, setAssignmentAnalysis] =
@@ -74,6 +76,7 @@ export default function App() {
               patients={patients}
               onSelectPatient={handleSelectPatientForEvaluation}
               onViewProfile={(patient) => setProfileModalPatient(patient)}
+              onOpenReport={(patient) => setReportModalPatient(patient)}
             />
           )}
 
@@ -108,11 +111,25 @@ export default function App() {
       {profileModalPatient && (
         <PatientProfileModal
           patient={profileModalPatient}
+          treatments={treatments}
           onClose={() => setProfileModalPatient(null)}
           onGoToRecommendedDiets={(patient) => {
             setSelectedPatient(patient);
             setCurrentTab('recommended');
           }}
+          onOpenReport={(patient) => {
+            setProfileModalPatient(null);
+            setReportModalPatient(patient);
+          }}
+        />
+      )}
+
+      {/* Patient Clinical Report Modal (Feature 1: Impresión y PDF de Informe Clínico) */}
+      {reportModalPatient && (
+        <PatientClinicalReportModal
+          patient={reportModalPatient}
+          treatments={treatments}
+          onClose={() => setReportModalPatient(null)}
         />
       )}
 

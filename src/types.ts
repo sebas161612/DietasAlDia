@@ -45,6 +45,13 @@ export interface DietScheduleItem {
   description: string;
 }
 
+export type AdministrationRoute =
+  | 'Vía Oral'
+  | 'Vía Enteral por Sonda'
+  | 'Vía Mixta (Oral asistida)'
+  | 'Vía Mixta (Oral + Enteral)'
+  | 'Vía Parenteral Complementaria';
+
 export interface Diet {
   id: string;
   code: string;
@@ -61,7 +68,7 @@ export interface Diet {
   }[];
   nutrients: Macronutrients;
   requiredIntake: string;
-  routeOfAdministration: 'Vía Oral' | 'Vía Enteral por Sonda' | 'Vía Mixta (Oral asistida)';
+  routeOfAdministration: AdministrationRoute | string;
   duration: string;
   dosage: string;
   schedule: DietScheduleItem[];

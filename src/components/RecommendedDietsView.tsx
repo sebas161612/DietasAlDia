@@ -164,6 +164,19 @@ export const RecommendedDietsView: React.FC<RecommendedDietsViewProps> = ({
                 Ver historia clínica completa
               </button>
             </div>
+
+            {/* Patient Nutritional & Caloric Requirements (Feature 4 Visibility) */}
+            {patient.clinicalRequirements && (
+              <div className="flex items-center gap-2 text-xs bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl text-slate-700">
+                <span className="font-bold text-slate-900 flex items-center gap-1 shrink-0">
+                  <Flame className="w-3.5 h-3.5 text-amber-500" />
+                  Requerimiento nutricional del paciente:
+                </span>
+                <span className="italic font-medium text-slate-600">
+                  {patient.clinicalRequirements}
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Patient Allergies & Restrictions Box */}

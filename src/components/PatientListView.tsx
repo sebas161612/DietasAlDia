@@ -5,6 +5,7 @@ import {
   ChevronRight,
   FileText,
   HeartPulse,
+  Printer,
   Search,
   ShieldCheck,
   User,
@@ -17,12 +18,14 @@ interface PatientListViewProps {
   patients: Patient[];
   onSelectPatient: (patient: Patient) => void;
   onViewProfile: (patient: Patient) => void;
+  onOpenReport?: (patient: Patient) => void;
 }
 
 export const PatientListView: React.FC<PatientListViewProps> = ({
   patients,
   onSelectPatient,
   onViewProfile,
+  onOpenReport,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'allergies' | 'safe'>('all');
@@ -236,22 +239,36 @@ export const PatientListView: React.FC<PatientListViewProps> = ({
               </div>
 
               {/* Actions */}
-              <div className="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-                <button
-                  id={`btn-profile-${patient.id}`}
-                  onClick={() => onViewProfile(patient)}
-                  className="inline-flex items-center gap-1 px-3 py-2 rounded-xl border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition"
-                >
-                  <FileText className="w-3.5 h-3.5 text-slate-500" />
-                  <span>Historia Clínica</span>
-                </button>
+              <div className="mt-5 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-1.5">
+                  <button
+                    id={`btn-profile-${patient.id}`}
+                    onClick={() => onViewProfile(patient)}
+                    className="inline-flex items-center gap-1 px-3 py-2 rounded-xl border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition"
+                  >
+                    <FileText className="w-3.5 h-3.5 text-slate-500" />
+                    <span>Historia</span>
+                  </button>
+
+                  {onOpenReport && (
+                    <button
+                      id={`btn-report-${patient.id}`}
+                      onClick={() => onOpenReport(patient)}
+                      className="inline-flex items-center gap-1 px-2.5 py-2 rounded-xl border border-teal-200 bg-teal-50/50 hover:bg-teal-50 text-xs font-semibold text-teal-800 transition"
+                      title="Imprimir o generar informe clínico"
+                    >
+                      <Printer className="w-3.5 h-3.5 text-teal-600" />
+                      <span className="hidden sm:inline">Informe</span>
+                    </button>
+                  )}
+                </div>
 
                 <button
                   id={`btn-select-diets-${patient.id}`}
                   onClick={() => onSelectPatient(patient)}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-teal-700 text-white text-xs font-bold hover:bg-teal-800 shadow-xs transition active:scale-95"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-teal-700 text-white text-xs font-bold hover:bg-teal-800 shadow-xs transition active:scale-95 ml-auto"
                 >
-                  <span>Ver Dietas Recomendadas</span>
+                  <span>Ver Dietas</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>

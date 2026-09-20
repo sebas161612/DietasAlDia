@@ -6,44 +6,65 @@ import {
   Calendar,
   CheckCircle2,
   Clock,
+  FileText,
   HeartPulse,
   Info,
+  Printer,
   Scale,
   ShieldAlert,
   ShieldCheck,
   User,
+  Utensils,
   X,
 } from 'lucide-react';
-import { Patient } from '../types';
+import { Patient, PrescribedTreatment } from '../types';
 import { getDiseaseById } from '../services/clinicalEngine';
 
 interface PatientProfileModalProps {
   patient: Patient | null;
+  treatments?: PrescribedTreatment[];
   onClose: () => void;
   onGoToRecommendedDiets: (patient: Patient) => void;
+  onOpenReport?: (patient: Patient) => void;
 }
 
 export const PatientProfileModal: React.FC<PatientProfileModalProps> = ({
   patient,
+  treatments = [],
   onClose,
   onGoToRecommendedDiets,
+  onOpenReport,
 }) => {
   if (!patient) return null;
 
   const disease = getDiseaseById(patient.activeDiseaseIds[0]);
+  const patientTreatments = treatments.filter((t) => t.patientId === patient.id);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 sm:p-6 overflow-y-auto">
       <div className="relative w-full max-w-3xl rounded-3xl bg-white shadow-2xl border border-slate-200 overflow-hidden my-8 animate-in fade-in zoom-in-95 duration-200">
         {/* Header with clinical badges */}
         <div className="bg-slate-900 text-white p-6 relative">
-          <button
-            id="btn-close-profile-modal"
-            onClick={onClose}
-            className="absolute top-5 right-5 p-2 rounded-full text-slate-400 hover:text-white hover:bg-slate-800 transition"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="absolute top-5 right-5 flex items-center gap-2">
+            {onOpenReport && (
+              <button
+                id="btn-print-report-header"
+                onClick={() => onOpenReport(patient)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-teal-600/80 hover:bg-teal-600 text-white text-xs font-bold transition shadow-xs"
+                title="Generar o Imprimir Informe Clínico Completo"
+              >
+                <Printer className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Imprimir Informe</span>
+              </button>
+            )}
+            <button
+              id="btn-close-profile-modal"
+              onClick={onClose}
+              className="p-2 rounded-full text-slate-400 hover:text-white hover:bg-slate-800 transition"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
 
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-2xl bg-teal-600/30 border border-teal-500/40 flex items-center justify-center text-teal-300 font-extrabold text-base">
@@ -227,16 +248,98 @@ export const PatientProfileModal: React.FC<PatientProfileModalProps> = ({
               {patient.clinicalHistory}
             </p>
           </div>
+
+          {/* Historial de Tratamientos Nutricionales Prescritos para este paciente (Feature 2 & 4) */}
+          <div className="space-y-2 pt-2 border-t border-slate-200">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4 text-teal-600" />
+                Tratamientos Nutricionales Prescritos ({patientTreatments.length})
+              </h3>
+              {patientTreatments.length > 0 && (
+                <span className="text-[11px] font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-full border border-teal-200">
+                  {patientTreatments.filter((t) => t.status === 'ACTIVO').length} activo(s)
+                </span>
+              )}
+            </div>
+
+            {patientTreatments.length > 0 ? (
+              <div className="space-y-2">
+                {patientTreatments.map((treatment) => (
+                  <div
+                    key={treatment.id}
+                    className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-1.5"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-extrabold text-slate-900 text-sm">
+                            {treatment.dietName}
+                          </span>
+                          <span className="font-mono text-xs text-slate-500 font-bold">
+                            [{treatment.dietCode}]
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-500">
+                          Prescrito el {treatment.prescriptionDate} por {treatment.physicianName}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${
+                          treatment.compatibilityAtAssignment === 'COMPATIBLE'
+                            ? 'bg-emerald-100 text-emerald-900 border border-emerald-300'
+                            : 'bg-amber-100 text-amber-900 border border-amber-300'
+                        }`}>
+                          {treatment.compatibilityAtAssignment === 'COMPATIBLE' ? '✓ Compatible' : '⚠ Excepción'}
+                        </span>
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-teal-100 text-teal-800 uppercase">
+                          {treatment.status}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 text-xs text-slate-600">
+                      <span>• Aporte: <strong>{treatment.caloricKcal} kcal/día</strong></span>
+                      <span>• Duración: <strong>{treatment.durationDays} días</strong></span>
+                      <span>• Vía: <strong>{treatment.routeOfAdministration}</strong></span>
+                    </div>
+
+                    <p className="text-[11px] text-slate-600 bg-slate-50 p-2 rounded-lg border border-slate-100 italic">
+                      "{treatment.clinicalNotes}"
+                    </p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-center text-xs text-slate-500">
+                Este paciente no tiene tratamientos prescritos en el registro actual.
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Footer Actions */}
         <div className="p-4 sm:p-6 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 rounded-xl border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-200 transition"
-          >
-            Volver a la lista
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 rounded-xl border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-200 transition"
+            >
+              Volver a la lista
+            </button>
+
+            {onOpenReport && (
+              <button
+                id="btn-print-patient-clinical-report"
+                onClick={() => onOpenReport(patient)}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white border border-teal-600/40 text-teal-800 hover:bg-teal-50 text-xs font-bold shadow-2xs transition"
+              >
+                <Printer className="w-3.5 h-3.5 text-teal-600" />
+                <span>Imprimir Informe Clínico</span>
+              </button>
+            )}
+          </div>
 
           <button
             id="btn-modal-go-to-diets"
