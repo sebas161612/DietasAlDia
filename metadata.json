@@ -1,0 +1,7 @@
+{
+  "name": "Dietas al Día",
+  "description": "Sistema clínico de asignación de tratamiento nutricional con cruce automático de diagnósticos, dietas y detección de incompatibilidades alimentarias (EPIC 28).",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
