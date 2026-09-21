@@ -4,16 +4,6 @@
 
 ---
 
-## 🌐 Despliegue en GitHub Pages
-
-La aplicación está configurada para su despliegue automatizado mediante **GitHub Actions**:
-
-- **URL de la aplicación en GitHub Pages:** [https://sebas161612.github.io/DietasAlDia/](https://sebas161612.github.io/DietasAlDia/)
-- **Repositorio:** [https://github.com/sebas161612/DietasAlDia](https://github.com/sebas161612/DietasAlDia)
-- **Automatización (CI/CD):** `.github/workflows/deploy.yml` compila y publica automáticamente la carpeta `dist` en GitHub Pages en cada push a la rama `main`.
-
----
-
 ## 🎯 Propósito y Capacidades del Sistema
 
 La plataforma permite al médico y al equipo de nutrición clínica:
