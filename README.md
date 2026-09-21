@@ -1,11 +1,14 @@
-# 🌐 Aplicación en línea
+# 🌐 Despliegue en Vercel
 
-**[Abrir Dietas al Día (Despliegue en Producción)](https://dietas-al-dia.surge.sh)**
+El proyecto está 100% configurado y listo para ser desplegado en **Vercel** mediante integración directa de Git o Vercel CLI, incluyendo soporte de Single Page Application (SPA) en `vercel.json`.
 
-## Demo
-- **URL pública directa:** https://dietas-al-dia.surge.sh
-- **Plataforma de despliegue:** Surge.sh (CDN global de distribución estática con soporte SPA)
-- **Compatibilidad:** Acceso universal desde cualquier navegador web de escritorio o dispositivo móvil, sin necesidad de instalación ni configuración local.
+### Parámetros de Configuración en Vercel:
+- **Framework Preset:** `Vite`
+- **Root Directory:** `./` (raíz del proyecto)
+- **Build Command:** `npm run build` (o `vite build`)
+- **Output Directory:** `dist`
+- **Install Command:** `npm install`
+- **Variables de Entorno:** *Ninguna requerida* (la aplicación opera de forma 100% autónoma con el motor clínico y datos mock locales).
 
 ---
 
@@ -43,7 +46,7 @@ $$\text{Paciente} \longrightarrow \text{Enfermedad Activa} \longrightarrow \text
 ### Principios Fundamentales del Motor Clínico:
 - **Cruce determinista basado en alimentos reales:** Los conflictos de incompatibilidad (`IncompatibilityConflict`) se originan única y exclusivamente a partir de los alimentos estructurados (`diet.foodIds` / `diet.foods`) y sus etiquetas alergénicas registradas (`allergenTags`).
 - **Sin falsos alimentos por texto libre:** Las contraindicaciones técnicas (`diet.contraindications`) y las precauciones clínicas (`diet.clinicalPrecaution`) se preservan como información médica de consulta y advertencia profesional, pero **no** se convierten artificialmente en alimentos incompatibles.
-- **Sin inferencias sobre alimentos neutros:** Un alimento estructurado sin etiquetas de alérgenos (por ejemplo, el arroz `f-10` en una dieta para celiaquía) no genera conflictos artificiales por el mero hecho de que la ficha técnica mencione la palabra "gluten" en su texto descriptivo.
+- **Sin inferencias sobre alimentos neutros:** Un alimento estructurado sin etiquetas de alérgenos (por ejemplo, el arroz en una dieta para celiaquía) no genera conflictos artificiales por el mero hecho de que la ficha técnica mencione la palabra "gluten" en su texto descriptivo.
 
 ---
 
@@ -123,11 +126,25 @@ Para comprobar que no existan errores de tipos ni sintaxis:
 npm run lint
 ```
 
-### 6. Despliegue Automatizado
-Para compilar y publicar los cambios directamente en el entorno de producción en Surge.sh:
-```bash
-npm run deploy
-```
+---
+
+## 🚀 Despliegue en Vercel (Paso a Paso)
+
+El repositorio incluye el archivo de configuración `vercel.json` preconfigurado. Para desplegar en Vercel:
+
+1. Inicie sesión en [Vercel](https://vercel.com).
+2. Haga clic en **Add New...** → **Project**.
+3. Importe el repositorio Git donde se encuentra este proyecto.
+4. En la pantalla de configuración del proyecto (**Configure Project**):
+   - **Framework Preset:** Seleccione `Vite`.
+   - **Root Directory:** `./`
+   - **Build and Output Settings:**
+     - **Build Command:** `npm run build`
+     - **Output Directory:** `dist`
+     - **Install Command:** `npm install`
+   - **Environment Variables:** No se requiere agregar ninguna variable.
+5. Haga clic en **Deploy**.
+6. Vercel compilará la aplicación en segundos y generará la URL pública productiva bajo el dominio `https://<tu-proyecto>.vercel.app`.
 
 ---
 
