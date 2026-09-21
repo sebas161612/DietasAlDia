@@ -79,46 +79,5 @@ La aplicación está diseñada bajo el patrón de arquitectura desacoplada y com
 
 ---
 
-## 💻 Instrucciones para Ejecución Local
-
-Para clonar y ejecutar este proyecto en su entorno de desarrollo local, siga estos sencillos pasos:
-
-### 1. Requisitos Previos
-- [Node.js](https://nodejs.org/) (versión 18 o superior recomendada).
-- Gestor de paquetes `npm` (incluido con Node.js).
-
-### 2. Instalación de Dependencias
-Clone el repositorio o descargue el código fuente y ejecute en la raíz del proyecto:
-```bash
-npm install
-```
-
-### 3. Iniciar el Servidor de Desarrollo
-Para iniciar la aplicación en modo desarrollo con recarga rápida:
-```bash
-npm run dev
-```
-La aplicación estará disponible de inmediato en: `http://localhost:3000`
-
-### 4. Compilación para Producción
-Para validar los tipos TypeScript y generar el paquete optimizado en la carpeta `dist/`:
-```bash
-npm run build
-```
-
-### 5. Verificación de Código (Linter & Tipado)
-Para comprobar que no existan errores de tipos ni sintaxis:
-```bash
-npm run lint
-```
-
-### 6. Vista Previa de la Compilación
-Para servir localmente la versión de producción generada en `dist/`:
-```bash
-npm run preview
-```
-
----
-
 ## 📄 Licencia y Propósito Académico
 Proyecto desarrollado para fines académicos y de demostración tecnológica en ingeniería de software para el área de la salud. Todas las marcas, códigos CIE-10 y datos de pacientes simulados son utilizados con fines exclusivamente didácticos y de verificación de requerimientos funcionales.
