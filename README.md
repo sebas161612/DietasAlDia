@@ -4,6 +4,16 @@
 
 ---
 
+## 🌐 Despliegue en GitHub Pages
+
+La aplicación está configurada para su despliegue automatizado mediante **GitHub Actions**:
+
+- **URL de la aplicación en GitHub Pages:** [https://sebas161612.github.io/DietasAlDia/](https://sebas161612.github.io/DietasAlDia/)
+- **Repositorio:** [https://github.com/sebas161612/DietasAlDia](https://github.com/sebas161612/DietasAlDia)
+- **Automatización (CI/CD):** `.github/workflows/deploy.yml` compila y publica automáticamente la carpeta `dist` en GitHub Pages en cada push a la rama `main`.
+
+---
+
 ## 🎯 Propósito y Capacidades del Sistema
 
 La plataforma permite al médico y al equipo de nutrición clínica:
@@ -76,6 +86,33 @@ La aplicación está diseñada bajo el patrón de arquitectura desacoplada y com
 - **Iconografía:** [Lucide React](https://lucide.dev/) para símbolos clínicos e indicadores de estado estándar.
 - **Animaciones e Interacción:** [Motion](https://motion.dev/) para transiciones suaves entre vistas y apertura de paneles modales.
 - **Gestión de Estado y Datos:** Estado reactivo en memoria y local con catálogo clínico estandarizado (`mockData.ts`) que modela pacientes reales, enfermedades CIE-10, requerimientos calóricos, alergias con severidad, alimentos con etiquetas alergénicas y dietas terapéuticas estructuradas.
+
+---
+
+## 💻 Instrucciones para Ejecución Local
+
+Para clonar y ejecutar este proyecto en su entorno de desarrollo local:
+
+1. **Instalación de Dependencias:**
+   ```bash
+   npm install
+   ```
+
+2. **Iniciar el Servidor de Desarrollo:**
+   ```bash
+   npm run dev
+   ```
+   La aplicación se iniciará de inmediato en `http://localhost:3000`.
+
+3. **Compilación para Producción:**
+   ```bash
+   npm run build
+   ```
+
+4. **Verificación de Tipos (Linter):**
+   ```bash
+   npm run lint
+   ```
 
 ---
 

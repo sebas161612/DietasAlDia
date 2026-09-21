@@ -6,6 +6,7 @@ import {VitePWA} from 'vite-plugin-pwa';
 
 export default defineConfig(() => {
   return {
+    base: '/DietasAlDia/',
     plugins: [
       react(),
       tailwindcss(),
@@ -13,15 +14,15 @@ export default defineConfig(() => {
         registerType: 'autoUpdate',
         includeAssets: ['icon.svg', 'apple-touch-icon.png'],
         manifest: {
-          id: '/',
+          id: '/DietasAlDia/',
           name: 'Dietas al Día — Asignación Nutricional',
           short_name: 'DietasAlDia',
           description: 'Sistema clínico de soporte nutricional y asignación segura de dietas compatibles para médicos (EPIC 28).',
           theme_color: '#0d9488',
           background_color: '#f8fafc',
           display: 'standalone',
-          start_url: '/',
-          scope: '/',
+          start_url: '/DietasAlDia/',
+          scope: '/DietasAlDia/',
           icons: [
             {
               src: '/pwa-192x192.png',
