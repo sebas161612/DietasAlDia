@@ -89,32 +89,5 @@ La aplicación está diseñada bajo el patrón de arquitectura desacoplada y com
 
 ---
 
-## 💻 Instrucciones para Ejecución Local
-
-Para clonar y ejecutar este proyecto en su entorno de desarrollo local:
-
-1. **Instalación de Dependencias:**
-   ```bash
-   npm install
-   ```
-
-2. **Iniciar el Servidor de Desarrollo:**
-   ```bash
-   npm run dev
-   ```
-   La aplicación se iniciará de inmediato en `http://localhost:3000`.
-
-3. **Compilación para Producción:**
-   ```bash
-   npm run build
-   ```
-
-4. **Verificación de Tipos (Linter):**
-   ```bash
-   npm run lint
-   ```
-
----
-
 ## 📄 Licencia y Propósito Académico
 Proyecto desarrollado para fines académicos y de demostración tecnológica en ingeniería de software para el área de la salud. Todas las marcas, códigos CIE-10 y datos de pacientes simulados son utilizados con fines exclusivamente didácticos y de verificación de requerimientos funcionales.
