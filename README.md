@@ -1,17 +1,3 @@
-# 🌐 Despliegue en Vercel
-
-El proyecto está 100% configurado y listo para ser desplegado en **Vercel** mediante integración directa de Git o Vercel CLI, incluyendo soporte de Single Page Application (SPA) en `vercel.json`.
-
-### Parámetros de Configuración en Vercel:
-- **Framework Preset:** `Vite`
-- **Root Directory:** `./` (raíz del proyecto)
-- **Build Command:** `npm run build` (o `vite build`)
-- **Output Directory:** `dist`
-- **Install Command:** `npm install`
-- **Variables de Entorno:** *Ninguna requerida* (la aplicación opera de forma 100% autónoma con el motor clínico y datos mock locales).
-
----
-
 # Dietas al Día — Asignación de Tratamiento Nutricional
 
 **Dietas al Día** es una aplicación web clínica especializada en el soporte para la toma de decisiones nutricionales en entornos hospitalarios y ambulatorios. Su flujo principal de valor implementa el **EPIC 28 — “Asignación tratamiento nutricional”**, brindando a los profesionales médicos una herramienta ágil, confiable y con seguridad cruzada para prescribir planes dietéticos terapéuticos adaptados a la patología y restricciones de cada paciente.
@@ -21,8 +7,8 @@ El proyecto está 100% configurado y listo para ser desplegado en **Vercel** med
 ## 🎯 Propósito y Capacidades del Sistema
 
 La plataforma permite al médico y al equipo de nutrición clínica:
-1. **Consultar pacientes:** Directorio clínico con búsqueda por nombre, número de historia clínica (HC), sala o cama.
-2. **Consultar su información clínica integral:** Antropometría (peso, talla, cálculo automatizado de IMC y clasificación nutricional), signos vitales y datos basales.
+1. **Consultar pacientes:** Directorio clínico con búsqueda en tiempo real por nombre, número de historia clínica (HC), sala o cama.
+2. **Consultar su información clínica integral:** Antropometría (peso, talla, cálculo automatizado de IMC y clasificación nutricional según la OMS), signos vitales y datos basales.
 3. **Visualizar enfermedades y requerimientos nutricionales:** Diagnósticos activos codificados (CIE-10), tratamientos en curso y metas calórico-nutricionales prescritas.
 4. **Consultar las dietas asociadas a una enfermedad:** Filtrado automático inmediato de planes nutricionales indicados según la patología activa del paciente.
 5. **Realizar automáticamente el cruce de seguridad:** Evaluación instantánea entre los alimentos que componen cada dieta y el perfil de alergias, intolerancias y restricciones del paciente.
@@ -126,25 +112,11 @@ Para comprobar que no existan errores de tipos ni sintaxis:
 npm run lint
 ```
 
----
-
-## 🚀 Despliegue en Vercel (Paso a Paso)
-
-El repositorio incluye el archivo de configuración `vercel.json` preconfigurado. Para desplegar en Vercel:
-
-1. Inicie sesión en [Vercel](https://vercel.com).
-2. Haga clic en **Add New...** → **Project**.
-3. Importe el repositorio Git donde se encuentra este proyecto.
-4. En la pantalla de configuración del proyecto (**Configure Project**):
-   - **Framework Preset:** Seleccione `Vite`.
-   - **Root Directory:** `./`
-   - **Build and Output Settings:**
-     - **Build Command:** `npm run build`
-     - **Output Directory:** `dist`
-     - **Install Command:** `npm install`
-   - **Environment Variables:** No se requiere agregar ninguna variable.
-5. Haga clic en **Deploy**.
-6. Vercel compilará la aplicación en segundos y generará la URL pública productiva bajo el dominio `https://<tu-proyecto>.vercel.app`.
+### 6. Vista Previa de la Compilación
+Para servir localmente la versión de producción generada en `dist/`:
+```bash
+npm run preview
+```
 
 ---
 
