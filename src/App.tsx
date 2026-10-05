@@ -5,13 +5,15 @@
 
 import React, { useState } from 'react';
 import { initialTreatmentsData, patientsData } from './data/mockData';
-import { CompatibilityAnalysis, Patient, PrescribedTreatment } from './types';
+import { CompatibilityAnalysis, Diet, IncompatibilityConflict, Patient, PrescribedTreatment } from './types';
+import { evaluateSingleDiet } from './services/clinicalEngine';
 import { Navbar } from './components/Navbar';
 import { DashboardView } from './components/DashboardView';
 import { PatientListView } from './components/PatientListView';
 import { RecommendedDietsView } from './components/RecommendedDietsView';
 import { TechnicalSheetModal } from './components/TechnicalSheetModal';
 import { AssignmentModal } from './components/AssignmentModal';
+import { ModifyDietModal } from './components/ModifyDietModal';
 import { PatientProfileModal } from './components/PatientProfileModal';
 import { PatientClinicalReportModal } from './components/PatientClinicalReportModal';
 import { TreatmentsView } from './components/TreatmentsView';
@@ -27,6 +29,9 @@ export default function App() {
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(patientsData[0]);
   const [treatments, setTreatments] = useState<PrescribedTreatment[]>(initialTreatmentsData);
 
+  // Map of patientId -> adapted Diet[]
+  const [adaptedDietsByPatient, setAdaptedDietsByPatient] = useState<Record<string, Diet[]>>({});
+
   // Modals state
   const [profileModalPatient, setProfileModalPatient] = useState<Patient | null>(null);
   const [reportModalPatient, setReportModalPatient] = useState<Patient | null>(null);
@@ -34,6 +39,10 @@ export default function App() {
     useState<CompatibilityAnalysis | null>(null);
   const [assignmentAnalysis, setAssignmentAnalysis] =
     useState<CompatibilityAnalysis | null>(null);
+  const [modifyingDietData, setModifyingDietData] = useState<{
+    diet: Diet;
+    conflicts: IncompatibilityConflict[];
+  } | null>(null);
 
   // Actions
   const handleSelectPatientForEvaluation = (patient: Patient) => {
@@ -43,6 +52,34 @@ export default function App() {
 
   const handleConfirmAssignment = (newTreatment: PrescribedTreatment) => {
     setTreatments((prev) => [newTreatment, ...prev]);
+  };
+
+  const handleSaveAdaptedDiet = (adaptedDiet: Diet) => {
+    if (!selectedPatient) return;
+    setAdaptedDietsByPatient((prev) => {
+      const existing = prev[selectedPatient.id] || [];
+      const filtered = existing.filter(
+        (d) => d.id !== adaptedDiet.id && d.originalDietId !== adaptedDiet.originalDietId
+      );
+      return {
+        ...prev,
+        [selectedPatient.id]: [...filtered, adaptedDiet],
+      };
+    });
+  };
+
+  const handleResetDietToOriginal = (originalDietId: string) => {
+    if (!selectedPatient) return;
+    setAdaptedDietsByPatient((prev) => {
+      const existing = prev[selectedPatient.id] || [];
+      const filtered = existing.filter(
+        (d) => d.id !== originalDietId && d.originalDietId !== originalDietId
+      );
+      return {
+        ...prev,
+        [selectedPatient.id]: filtered,
+      };
+    });
   };
 
   return (
@@ -84,9 +121,12 @@ export default function App() {
             <RecommendedDietsView
               patient={selectedPatient}
               allPatients={patients}
+              patientModifiedDiets={adaptedDietsByPatient[selectedPatient.id] || []}
               onSwitchPatient={(patient) => setSelectedPatient(patient)}
               onOpenTechnicalSheet={(analysis) => setTechnicalSheetAnalysis(analysis)}
               onSelectDietToAssign={(analysis) => setAssignmentAnalysis(analysis)}
+              onOpenModifyDiet={(diet, conflicts) => setModifyingDietData({ diet, conflicts })}
+              onResetDietToOriginal={handleResetDietToOriginal}
               onBackToPatients={() => setCurrentTab('patients')}
               onViewPatientProfile={(patient) => setProfileModalPatient(patient)}
             />
@@ -143,6 +183,10 @@ export default function App() {
             setTechnicalSheetAnalysis(null);
             setAssignmentAnalysis(analysis);
           }}
+          onOpenModifyDiet={(diet, conflicts) => {
+            setTechnicalSheetAnalysis(null);
+            setModifyingDietData({ diet, conflicts });
+          }}
         />
       )}
 
@@ -153,6 +197,28 @@ export default function App() {
           patient={selectedPatient}
           onClose={() => setAssignmentAnalysis(null)}
           onConfirmAssignment={handleConfirmAssignment}
+          onOpenModifyDiet={(diet, conflicts) => {
+            setAssignmentAnalysis(null);
+            setModifyingDietData({ diet, conflicts });
+          }}
+        />
+      )}
+
+      {/* Modify & Adapt Diet Modal (Clinical customization of incompatible diets) */}
+      {modifyingDietData && selectedPatient && (
+        <ModifyDietModal
+          diet={modifyingDietData.diet}
+          patient={selectedPatient}
+          initialConflicts={modifyingDietData.conflicts}
+          onClose={() => setModifyingDietData(null)}
+          onSaveAdaptedDiet={handleSaveAdaptedDiet}
+          onResetToOriginal={handleResetDietToOriginal}
+          onPrescribeDirectly={(adaptedDiet) => {
+            handleSaveAdaptedDiet(adaptedDiet);
+            const evalResult = evaluateSingleDiet(adaptedDiet, selectedPatient);
+            setModifyingDietData(null);
+            setAssignmentAnalysis(evalResult);
+          }}
         />
       )}
 

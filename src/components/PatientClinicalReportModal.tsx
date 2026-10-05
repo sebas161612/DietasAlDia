@@ -316,7 +316,12 @@ export const PatientClinicalReportModal: React.FC<PatientClinicalReportModalProp
                           </p>
                         </div>
 
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {treatment.isAdaptedDiet && (
+                            <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-teal-100 text-teal-900 border border-teal-300">
+                              ⚡ Dieta Adaptada
+                            </span>
+                          )}
                           <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${
                             treatment.compatibilityAtAssignment === 'COMPATIBLE'
                               ? 'bg-emerald-100 text-emerald-900 border border-emerald-300'

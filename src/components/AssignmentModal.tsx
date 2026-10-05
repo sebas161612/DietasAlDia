@@ -16,14 +16,16 @@ import {
   UserCheck,
   X,
 } from 'lucide-react';
-import { CompatibilityAnalysis, Patient, PrescribedTreatment } from '../types';
+import { CompatibilityAnalysis, Diet, IncompatibilityConflict, Patient, PrescribedTreatment } from '../types';
 import { getDiseaseById } from '../services/clinicalEngine';
+import { Sliders, Sparkles } from 'lucide-react';
 
 interface AssignmentModalProps {
   analysis: CompatibilityAnalysis | null;
   patient: Patient;
   onClose: () => void;
   onConfirmAssignment: (treatment: PrescribedTreatment) => void;
+  onOpenModifyDiet?: (diet: Diet, conflicts: IncompatibilityConflict[]) => void;
 }
 
 export const AssignmentModal: React.FC<AssignmentModalProps> = ({
@@ -31,6 +33,7 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
   patient,
   onClose,
   onConfirmAssignment,
+  onOpenModifyDiet,
 }) => {
   if (!analysis) return null;
 
@@ -41,11 +44,16 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
   // Form State
   const [durationDays, setDurationDays] = useState('14');
   const [route, setRoute] = useState<string>(diet.routeOfAdministration);
-  const [clinicalNotes, setClinicalNotes] = useState(
-    isCompatible
-      ? `Indicación de tratamiento nutricional según protocolo clínico para ${disease?.name || 'paciente'}. Paciente sin contraindicaciones alérgicas detectadas.`
-      : ''
-  );
+  const [clinicalNotes, setClinicalNotes] = useState(() => {
+    if (diet.isAdapted) {
+      const excluded = diet.excludedFoods?.map((e) => e.foodName).join(', ') || '';
+      return `Tratamiento nutricional con dieta adaptada para ${patient.fullName}. Ingredientes excluidos por seguridad alergénica: ${excluded}. Protocolo de cocina sin contaminación cruzada.`;
+    }
+    if (isCompatible) {
+      return `Indicación de tratamiento nutricional según protocolo clínico para ${disease?.name || 'paciente'}. Paciente sin contraindicaciones alérgicas detectadas.`;
+    }
+    return '';
+  });
   const [overrideJustification, setOverrideJustification] = useState('');
   const [confirmedOverride, setConfirmedOverride] = useState(false);
   const [isPrescribed, setIsPrescribed] = useState(false);
@@ -79,6 +87,10 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
       status: 'ACTIVO',
       compatibilityAtAssignment: analysis.status,
       conflictOverrideJustification: overrideJustification,
+      isAdaptedDiet: diet.isAdapted,
+      adaptationSummary: diet.isAdapted
+        ? `Dieta adaptada: exclusión de ${diet.excludedFoods?.map((e) => e.foodName).join(', ') || 'ingredientes alérgenos'}`
+        : undefined,
     };
 
     setPrescribedObject(newTreatment);
@@ -139,6 +151,29 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
                   ))}
                 </div>
 
+                {/* Call-to-action to adapt/modify diet instead of forcing exception */}
+                {onOpenModifyDiet && (
+                  <div className="mt-2 p-3 bg-white/95 rounded-xl border border-rose-300 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-2xs">
+                    <div className="flex items-center gap-2">
+                      <Sliders className="w-4 h-4 text-teal-700 shrink-0" />
+                      <span className="text-xs text-slate-800 font-bold">
+                        ¿Prefiere adaptar la receta? Excluya los alérgenos para hacerla 100% compatible.
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onClose();
+                        onOpenModifyDiet(diet, analysis.conflicts);
+                      }}
+                      className="px-3 py-1.5 bg-teal-700 hover:bg-teal-800 text-white rounded-lg text-xs font-bold shrink-0 transition flex items-center gap-1 shadow-2xs"
+                    >
+                      <Sliders className="w-3 h-3" />
+                      <span>Modificar Dieta Ahora</span>
+                    </button>
+                  </div>
+                )}
+
                 <div className="pt-2 border-t border-rose-200 text-xs">
                   <label className="flex items-start gap-2 cursor-pointer font-bold text-rose-950">
                     <input
@@ -173,16 +208,34 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
 
             {/* Compatible Verification Banner */}
             {isCompatible && (
-              <div className="p-4 bg-emerald-50 border-b border-emerald-200 text-emerald-950 flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0">
-                  <ShieldCheck className="w-5 h-5" />
+              <div
+                className={`p-4 border-b flex items-center gap-3 ${
+                  diet.isAdapted
+                    ? 'bg-teal-50 border-teal-200 text-teal-950'
+                    : 'bg-emerald-50 border-emerald-200 text-emerald-950'
+                }`}
+              >
+                <div
+                  className={`w-8 h-8 rounded-xl text-white flex items-center justify-center shrink-0 shadow-2xs ${
+                    diet.isAdapted ? 'bg-teal-700' : 'bg-emerald-600'
+                  }`}
+                >
+                  {diet.isAdapted ? <Sparkles className="w-5 h-5" /> : <ShieldCheck className="w-5 h-5" />}
                 </div>
                 <div className="text-xs">
-                  <p className="font-bold text-emerald-950">
-                    Verificación de Seguridad Exitosa (CA4)
+                  <p className="font-bold flex items-center gap-1.5">
+                    <span>
+                      {diet.isAdapted
+                        ? 'Dieta Adaptada Clínicamente (Prescripción Segura)'
+                        : 'Verificación de Seguridad Exitosa (CA4)'}
+                    </span>
                   </p>
-                  <p className="text-emerald-800">
-                    El algoritmo determinista certificó que ningún alimento de esta dieta genera conflicto con las alergias o restricciones de {patient.fullName}.
+                  <p className={diet.isAdapted ? 'text-teal-900' : 'text-emerald-800'}>
+                    {diet.isAdapted
+                      ? `Se han excluido/sustituido los ingredientes conflictivos para ${patient.fullName}. Alimentos excluidos: ${
+                          diet.excludedFoods?.map((e) => e.foodName).join(', ') || 'alérgenos'
+                        }.`
+                      : `El algoritmo determinista certificó que ningún alimento de esta dieta genera conflicto con las alergias o restricciones de ${patient.fullName}.`}
                   </p>
                 </div>
               </div>

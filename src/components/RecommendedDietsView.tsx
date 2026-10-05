@@ -14,22 +14,28 @@ import {
   HeartPulse,
   Info,
   Layers,
+  RotateCcw,
   Scale,
   ShieldAlert,
   ShieldCheck,
+  Sliders,
   Sparkles,
   Utensils,
+  Wrench,
   XCircle,
 } from 'lucide-react';
-import { CompatibilityAnalysis, Patient } from '../types';
+import { CompatibilityAnalysis, Diet, IncompatibilityConflict, Patient } from '../types';
 import { evaluatePatientDiets } from '../services/clinicalEngine';
 
 interface RecommendedDietsViewProps {
   patient: Patient;
   allPatients: Patient[];
+  patientModifiedDiets?: Diet[];
   onSwitchPatient: (patient: Patient) => void;
   onOpenTechnicalSheet: (analysis: CompatibilityAnalysis) => void;
   onSelectDietToAssign: (analysis: CompatibilityAnalysis) => void;
+  onOpenModifyDiet: (diet: Diet, conflicts: IncompatibilityConflict[]) => void;
+  onResetDietToOriginal?: (originalDietId: string) => void;
   onBackToPatients: () => void;
   onViewPatientProfile: (patient: Patient) => void;
 }
@@ -37,19 +43,22 @@ interface RecommendedDietsViewProps {
 export const RecommendedDietsView: React.FC<RecommendedDietsViewProps> = ({
   patient,
   allPatients,
+  patientModifiedDiets = [],
   onSwitchPatient,
   onOpenTechnicalSheet,
   onSelectDietToAssign,
+  onOpenModifyDiet,
+  onResetDietToOriginal,
   onBackToPatients,
   onViewPatientProfile,
 }) => {
   const [filterMode, setFilterMode] = useState<'all' | 'compatible' | 'incompatible'>('all');
   const [showPatientSwitcher, setShowPatientSwitcher] = useState(false);
 
-  // Execute deterministic clinical cross-engine (EPIC 28)
+  // Execute deterministic clinical cross-engine (EPIC 28) with patient-specific modified diets
   const evaluation = useMemo(() => {
-    return evaluatePatientDiets(patient);
-  }, [patient]);
+    return evaluatePatientDiets(patient, undefined, patientModifiedDiets);
+  }, [patient, patientModifiedDiets]);
 
   const filteredAnalyses = useMemo(() => {
     if (filterMode === 'compatible') {
@@ -359,7 +368,7 @@ export const RecommendedDietsView: React.FC<RecommendedDietsViewProps> = ({
                   )}
 
                   <div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <span
                         className={`text-xs uppercase tracking-wider font-extrabold px-2 py-0.5 rounded-md ${
                           isCompatible
@@ -369,6 +378,12 @@ export const RecommendedDietsView: React.FC<RecommendedDietsViewProps> = ({
                       >
                         {isCompatible ? '✓ COMPATIBLE — DIETA SEGURA' : '⚠ INCOMPATIBILIDAD DETECTADA'}
                       </span>
+                      {diet.isAdapted && (
+                        <span className="text-[10px] uppercase font-black px-2 py-0.5 rounded-md bg-teal-700 text-white flex items-center gap-1 shadow-2xs">
+                          <Sparkles className="w-3 h-3 text-teal-300" />
+                          Adaptada para este Paciente
+                        </span>
+                      )}
                       <span className="text-xs font-mono font-bold text-slate-500">
                         {diet.code}
                       </span>
@@ -421,6 +436,70 @@ export const RecommendedDietsView: React.FC<RecommendedDietsViewProps> = ({
                         </span>
                       </div>
                     ))}
+                  </div>
+
+                  {/* Feature: Modify Incompatible Diet Call-to-Action */}
+                  <div className="mt-3 pt-3 border-t border-amber-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-amber-100/70 p-3 rounded-xl">
+                    <div className="flex items-center gap-2">
+                      <Sliders className="w-4 h-4 text-amber-900 shrink-0" />
+                      <span className="text-xs font-bold text-amber-950">
+                        ¿Desea prescribir esta dieta? Modifique los ingredientes para excluir los alérgenos y convertirla en una opción 100% segura.
+                      </span>
+                    </div>
+                    <button
+                      id={`btn-modify-diet-conflict-${diet.id}`}
+                      onClick={() => onOpenModifyDiet(diet, analysis.conflicts)}
+                      className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-teal-700 text-white text-xs font-bold hover:bg-teal-800 shadow-2xs transition shrink-0 active:scale-95"
+                    >
+                      <Sliders className="w-3.5 h-3.5" />
+                      <span>Modificar Dieta (Adaptar para el Paciente)</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Adapted Diet Summary Box if already modified */}
+              {diet.isAdapted && (
+                <div className="mx-6 mt-4 p-4 rounded-2xl bg-teal-50 border-2 border-teal-300 text-teal-950 space-y-2">
+                  <div className="flex items-center justify-between gap-2 border-b border-teal-200 pb-2">
+                    <h4 className="text-xs font-black uppercase tracking-wider text-teal-900 flex items-center gap-1.5">
+                      <Sparkles className="w-4 h-4 text-teal-700" />
+                      Adaptación Clínica Personalizada para este Paciente
+                    </h4>
+                    {onResetDietToOriginal && (
+                      <button
+                        onClick={() => onResetDietToOriginal(diet.originalDietId || diet.id)}
+                        className="text-[11px] font-bold text-slate-500 hover:text-rose-700 flex items-center gap-1 transition"
+                      >
+                        <RotateCcw className="w-3 h-3" />
+                        <span>Restaurar original</span>
+                      </button>
+                    )}
+                  </div>
+                  <div className="text-xs space-y-1">
+                    {diet.excludedFoods && diet.excludedFoods.length > 0 && (
+                      <p className="text-teal-950">
+                        <strong>Alimentos excluidos por alérgeno:</strong>{' '}
+                        <span className="text-rose-700 font-bold">
+                          {diet.excludedFoods.map((ef) => ef.foodName).join(', ')}
+                        </span>
+                      </p>
+                    )}
+                    {diet.substitutedFoods && diet.substitutedFoods.length > 0 && (
+                      <p className="text-teal-950">
+                        <strong>Sustituciones aplicadas:</strong>{' '}
+                        <span className="text-teal-800 font-semibold">
+                          {diet.substitutedFoods
+                            .map((sf) => `${sf.originalFoodName} ➔ ${sf.replacementFoodName}`)
+                            .join('; ')}
+                        </span>
+                      </p>
+                    )}
+                    {diet.adaptationNotes && (
+                      <p className="text-[11px] text-slate-600 italic">
+                        "{diet.adaptationNotes}"
+                      </p>
+                    )}
                   </div>
                 </div>
               )}
@@ -493,14 +572,25 @@ export const RecommendedDietsView: React.FC<RecommendedDietsViewProps> = ({
 
                 {/* Card Action Buttons (CA3 & CA4) */}
                 <div className="mt-5 pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <button
-                    id={`btn-tech-sheet-${diet.id}`}
-                    onClick={() => onOpenTechnicalSheet(analysis)}
-                    className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-slate-300 bg-white text-xs font-bold text-slate-700 hover:bg-slate-100 transition shadow-2xs active:scale-95"
-                  >
-                    <FileText className="w-4 h-4 text-teal-700" />
-                    <span>Ver Ficha Técnica Completa (CA3)</span>
-                  </button>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <button
+                      id={`btn-tech-sheet-${diet.id}`}
+                      onClick={() => onOpenTechnicalSheet(analysis)}
+                      className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-xs font-bold text-slate-700 hover:bg-slate-100 transition shadow-2xs active:scale-95"
+                    >
+                      <FileText className="w-4 h-4 text-teal-700" />
+                      <span>Ver Ficha Técnica (CA3)</span>
+                    </button>
+
+                    <button
+                      id={`btn-modify-diet-action-${diet.id}`}
+                      onClick={() => onOpenModifyDiet(diet, analysis.conflicts)}
+                      className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-teal-300 bg-teal-50/90 text-xs font-bold text-teal-800 hover:bg-teal-100 transition shadow-2xs active:scale-95"
+                    >
+                      <Sliders className="w-4 h-4 text-teal-700" />
+                      <span>{diet.isAdapted ? 'Editar Adaptación' : 'Modificar Dieta (Adaptar)'}</span>
+                    </button>
+                  </div>
 
                   <div className="flex items-center gap-2">
                     {isCompatible ? (

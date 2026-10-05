@@ -127,13 +127,59 @@ export function checkFoodConflict(
 }
 
 /**
+ * Evaluates compatibility of a single diet against a patient's allergies and restrictions.
+ */
+export function evaluateSingleDiet(
+  diet: Diet,
+  patient: Patient
+): CompatibilityAnalysis {
+  const dietFoods: Food[] = diet.foodIds
+    .map((fId) => foodsData.find((f) => f.id === fId))
+    .filter((f): f is Food => !!f);
+
+  const conflicts: IncompatibilityConflict[] = [];
+
+  for (const food of dietFoods) {
+    const foodConflicts = checkFoodConflict(food, patient);
+    conflicts.push(...foodConflicts);
+  }
+
+  const status: CompatibilityStatus =
+    conflicts.length === 0 ? 'COMPATIBLE' : 'INCOMPATIBLE';
+
+  let clinicalSummary = '';
+  if (status === 'COMPATIBLE') {
+    if (diet.isAdapted) {
+      clinicalSummary =
+        '✓ Compatible (Dieta Adaptada) — Incompatibilidades resueltas mediante exclusión/sustitución de ingredientes alérgenos.';
+    } else {
+      clinicalSummary =
+        '✓ Compatible — No se detectaron incompatibilidades con las alergias ni restricciones alimentarias registradas del paciente.';
+    }
+  } else {
+    const distinctFoods = Array.from(new Set(conflicts.map((c) => c.foodName))).join(', ');
+    const distinctAllergies = Array.from(new Set(conflicts.map((c) => c.patientRestriction))).join(' | ');
+    clinicalSummary = `⚠ Incompatibilidad detectada — Contiene ${distinctFoods} incompatible con: ${distinctAllergies}.`;
+  }
+
+  return {
+    diet,
+    status,
+    conflicts,
+    compatibilityScore: status === 'COMPATIBLE' ? 100 : Math.max(0, 100 - conflicts.length * 40),
+    clinicalSummary,
+  };
+}
+
+/**
  * Executes the clinical cross-engine (EPIC 28):
  * Patient -> Diagnosed Diseases -> Associated Diets -> Foods Analysis -> Allergies & Incompatibilities Check
  * Returns evaluated diets with deterministic compatibility status.
  */
 export function evaluatePatientDiets(
   patient: Patient,
-  selectedDiseaseId?: string
+  selectedDiseaseId?: string,
+  modifiedDiets?: Diet[]
 ): {
   patient: Patient;
   evaluatedDiseases: Disease[];
@@ -159,44 +205,23 @@ export function evaluatePatientDiets(
     disease.associatedDietIds.forEach((id) => associatedDietIdSet.add(id));
   }
 
-  const associatedDiets = dietsData.filter((diet) =>
+  const baseAssociatedDiets = dietsData.filter((diet) =>
     associatedDietIdSet.has(diet.id)
   );
 
-  // 3. For each diet, inspect foods and cross against patient allergies/restrictions
-  const analyses: CompatibilityAnalysis[] = associatedDiets.map((diet) => {
-    const dietFoods: Food[] = diet.foodIds
-      .map((fId) => foodsData.find((f) => f.id === fId))
-      .filter((f): f is Food => !!f);
-
-    const conflicts: IncompatibilityConflict[] = [];
-
-    for (const food of dietFoods) {
-      const foodConflicts = checkFoodConflict(food, patient);
-      conflicts.push(...foodConflicts);
-    }
-
-    const status: CompatibilityStatus =
-      conflicts.length === 0 ? 'COMPATIBLE' : 'INCOMPATIBLE';
-
-    let clinicalSummary = '';
-    if (status === 'COMPATIBLE') {
-      clinicalSummary =
-        '✓ Compatible — No se detectaron incompatibilidades con las alergias ni restricciones alimentarias registradas del paciente.';
-    } else {
-      const distinctFoods = Array.from(new Set(conflicts.map((c) => c.foodName))).join(', ');
-      const distinctAllergies = Array.from(new Set(conflicts.map((c) => c.patientRestriction))).join(' | ');
-      clinicalSummary = `⚠ Incompatibilidad detectada — Contiene ${distinctFoods} incompatible con: ${distinctAllergies}.`;
-    }
-
-    return {
-      diet,
-      status,
-      conflicts,
-      compatibilityScore: status === 'COMPATIBLE' ? 100 : Math.max(0, 100 - conflicts.length * 40),
-      clinicalSummary,
-    };
+  // If the patient has customized/modified diets, replace the base diet with the modified one
+  const associatedDiets = baseAssociatedDiets.map((baseDiet) => {
+    if (!modifiedDiets || modifiedDiets.length === 0) return baseDiet;
+    const modified = modifiedDiets.find(
+      (m) => m.id === baseDiet.id || m.originalDietId === baseDiet.id
+    );
+    return modified || baseDiet;
   });
+
+  // 3. For each diet, inspect foods and cross against patient allergies/restrictions
+  const analyses: CompatibilityAnalysis[] = associatedDiets.map((diet) =>
+    evaluateSingleDiet(diet, patient)
+  );
 
   // Sort: Compatible diets first for clinical speed (< 90s CA4), then Incompatible
   analyses.sort((a, b) => {

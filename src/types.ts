@@ -75,6 +75,17 @@ export interface Diet {
   supplements?: string[];
   contraindications: string[];
   clinicalPrecaution?: string;
+  isAdapted?: boolean;
+  originalDietId?: string;
+  originalDietName?: string;
+  adaptationNotes?: string;
+  excludedFoods?: { foodId: string; foodName: string; reason: string }[];
+  substitutedFoods?: {
+    originalFoodId: string;
+    originalFoodName: string;
+    replacementFoodName: string;
+    notes?: string;
+  }[];
 }
 
 export interface Disease {
@@ -154,4 +165,6 @@ export interface PrescribedTreatment {
   compatibilityAtAssignment: CompatibilityStatus;
   conflictOverrideJustification?: string;
   schedule?: DietScheduleItem[];
+  isAdaptedDiet?: boolean;
+  adaptationSummary?: string;
 }

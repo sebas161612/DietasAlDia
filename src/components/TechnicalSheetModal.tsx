@@ -17,14 +17,16 @@ import {
   Utensils,
   X,
 } from 'lucide-react';
-import { CompatibilityAnalysis, Patient } from '../types';
+import { CompatibilityAnalysis, Diet, IncompatibilityConflict, Patient } from '../types';
 import { getDiseaseById, getFoodById } from '../services/clinicalEngine';
+import { Sliders } from 'lucide-react';
 
 interface TechnicalSheetModalProps {
   analysis: CompatibilityAnalysis | null;
   patient: Patient;
   onClose: () => void;
   onSelectToAssign: (analysis: CompatibilityAnalysis) => void;
+  onOpenModifyDiet?: (diet: Diet, conflicts: IncompatibilityConflict[]) => void;
 }
 
 export const TechnicalSheetModal: React.FC<TechnicalSheetModalProps> = ({
@@ -32,6 +34,7 @@ export const TechnicalSheetModal: React.FC<TechnicalSheetModalProps> = ({
   patient,
   onClose,
   onSelectToAssign,
+  onOpenModifyDiet,
 }) => {
   if (!analysis) return null;
 
@@ -322,12 +325,28 @@ export const TechnicalSheetModal: React.FC<TechnicalSheetModalProps> = ({
 
         {/* Footer Actions */}
         <div className="p-4 sm:p-6 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <button
-            onClick={onClose}
-            className="px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition"
-          >
-            Cerrar Ficha Técnica
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onClose}
+              className="px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition"
+            >
+              Cerrar Ficha Técnica
+            </button>
+
+            {onOpenModifyDiet && (
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  onOpenModifyDiet(diet, analysis.conflicts);
+                }}
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-teal-300 bg-teal-50 text-xs font-bold text-teal-800 hover:bg-teal-100 transition shadow-2xs"
+              >
+                <Sliders className="w-4 h-4 text-teal-700" />
+                <span>{diet.isAdapted ? 'Editar Adaptación' : 'Modificar Dieta (Adaptar)'}</span>
+              </button>
+            )}
+          </div>
 
           <button
             id="btn-assign-from-tech-sheet"

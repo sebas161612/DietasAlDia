@@ -124,6 +124,11 @@ export const TreatmentsView: React.FC<TreatmentsViewProps> = ({
                     >
                       {treatment.status}
                     </span>
+                    {treatment.isAdaptedDiet && (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-teal-100 text-teal-900 border border-teal-300">
+                        ⚡ Dieta Adaptada
+                      </span>
+                    )}
                   </div>
                   <p className="text-xs text-slate-500 mt-0.5">
                     Diagnóstico asociado: <strong>{treatment.diseaseName}</strong>

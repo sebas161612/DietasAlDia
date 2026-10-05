@@ -25,6 +25,7 @@ Su flujo principal de valor implementa el **EPIC 28 — “Asignación tratamien
 - **Ficha Clínica Integral:** Visualización de peso, talla, IMC clasificado (OMS), signos vitales y requerimientos calóricos.
 - **Catálogo de Dietas Terapéuticas:** Fichas técnicas completas con composición cualitativa/cuantitativa, macronutrientes, indicaciones, precauciones y contraindicaciones sin perder de vista los datos del paciente.
 - **Motor Clínico de Compatibilidad:** Cálculo de índice de compatibilidad (*compatibility score*) y desglose específico del alimento conflictivo (`foodId`), etiqueta alergénica coincidente y justificación médica.
+- **Adaptación y Modificación de Dietas Incompatibles:** Herramienta clínica para excluir ingredientes con alérgenos o sustituirlos por alternativas seguras, recalculando la compatibilidad en tiempo real y transformando dietas incompatibles en prescripciones 100% seguras.
 - **Prescripción y Registro:** Configuración de vía (oral, asistida, enteral, parenteral) y duración del tratamiento con actualización inmediata en el historial.
 - **Exportación e Impresión:** Generador de informe formal formateado mediante `@media print` para exportación a PDF en un clic.
 - **PWA & Offline:** Soporte para instalación como aplicación web progresiva y navegación continua.
